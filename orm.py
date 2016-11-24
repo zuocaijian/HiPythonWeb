@@ -207,7 +207,7 @@ class Field(object):
         self.default = default
 
     def __str__(self):
-        return '<%s, %S:%s>' % (self.__class__, __name__, self.column_type, self.name)
+        return '<%s, %s:%s>' % (self.__class__.__name__, self.column_type, self.name)
 
 
 class StringField(Field):
