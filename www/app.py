@@ -6,7 +6,7 @@
 ___author___ = 'zcj'
 
 import www.orm
-from www.coroweb import add_route, add_static
+from www.coroweb import add_routes, add_static
 
 import asyncio, os, json, time, aiomysql
 import logging
@@ -25,11 +25,11 @@ def index(request):
 def init_jinja2(app, **kw):
     logging.info('init jinja2...')
     options = dict(
-        autoescapte=kw.get('autoescape', True),
+        autoescape=kw.get('autoescape', True),
         block_start_string=kw.get('block_start_string', '{%s'),
         block_end_string=kw.get('block_end_string', '%s}'),
-        variable_start_string=kw.get('variable_start_string', '{%s'),
-        variable_end_string=kw.get('variable_end_string', '%}'),
+        variable_start_string=kw.get('variable_start_string', '{{'),
+        variable_end_string=kw.get('variable_end_string', '}}'),
         auto_reload=kw.get('auto_reload', True)
     )
     path = kw.get('path', None)
@@ -48,9 +48,23 @@ async def logger_factory(app, handler):
     async def logger(request):
         logging.info('Request: %s %s' % (request.method, request.path))
         # await asyncio.sleep(0.3)
-        return (await handler(request))
+        return await handler(request)
 
     return logger
+
+
+async def data_factory(app, handler):
+    async def parse_data(request):
+        if request.method == 'POST':
+            if request.content_type.startwith('application/json'):
+                request.__data__ = await request.json()
+                logging.info('request json: %s' % str(request.__data__))
+            elif request.content_type.startwith('application/x-www-form-urlencode'):
+                request.__data__ = await request.post()
+                logging.info('request form: %s' % str(request.__data__))
+        return await handler(request)
+
+    return parse_data
 
 
 async def response_factory(app, handler):
@@ -90,6 +104,7 @@ async def response_factory(app, handler):
         resp = web.Response(body=str(r).encode('utf-8'))
         resp.content_type = 'text/plain;charset=utf8'
         return resp
+
     return response
 
 
@@ -97,7 +112,7 @@ def datetime_filter(t):
     delta = int(time.time() - t)
     if delta < 60:
         return u'1分钟前'
-    if delta <3600:
+    if delta < 3600:
         return u'%s分钟前' % (delta // 60)
     if delta < 86400:
         return u'%s小时前' % (delta // 3600)
@@ -108,8 +123,14 @@ def datetime_filter(t):
 
 
 async def init(loop):
-    app = web.Application(loop=loop)
-    app.router.add_route('GET', '/', index)
+    await www.orm.create_pool(loop=loop, host='127.0.0.1', port=3306, user='www-data', password='www-data',
+                              db='awesome')
+    app = web.Application(loop=loop, middlewares=[
+        logger_factory, response_factory
+    ])
+    init_jinja2(app, filters=dict(datetime=datetime_filter))
+    add_routes(app, 'www.handlers')
+    add_static(app)
     srv = await loop.create_server(app.make_handler(), '127.0.0.1', 9000)
     logging.info('server started at http://127.0.0.1:9000...')
     return srv

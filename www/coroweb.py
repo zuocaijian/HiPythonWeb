@@ -161,7 +161,7 @@ class RequestHandler(object):
 
 def add_static(app):
     path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'static')
-    app.route.add_static('/static', path)
+    app.router.add_static('/static', path)
     logging.info('add static %s => %s' % ('/static', path))
 
 
@@ -174,7 +174,7 @@ def add_route(app, fn):
         fn = asyncio.coroutine(fn)
     logging.info(
         'add route %s %s => %s(%s)' % (method, path, fn.__name__, ', '.join(inspect.signature(fn).parameters.keys())))
-    app.route.add_route(method, path, RequestHandler(app, fn))
+    app.router.add_route(method, path, RequestHandler(app, fn))
 
 
 def add_routes(app, module_name):
