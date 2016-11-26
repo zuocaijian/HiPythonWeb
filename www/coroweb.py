@@ -72,7 +72,7 @@ def has_named_kw_args(fn):
             return True
 
 
-def has_var_kw_args(fn):
+def has_var_kw_arg(fn):
     params = inspect.signature(fn).parameters
     for name, param in params.items():
         if param.kind == inspect.Parameter.VAR_KEYWORD:
@@ -87,10 +87,10 @@ def has_request_arg(fn):
         if name == 'request':
             found = True
             continue
-        if found and (param.kind != inspect.Parameter.VAR_KEYWORD and param.kind != inspect.Parameter.KEYWORD_ONLY
-                      and param.kind != inspect.Parameter.POSITIONAL_ONLY):
+        if found and (param.kind != inspect.Parameter.VAR_POSITIONAL and param.kind != inspect.Parameter.KEYWORD_ONLY
+                      and param.kind != inspect.Parameter.VAR_KEYWORD):
             raise ValueError(
-                'request parameter must be the last named parameter in function:%s%s' % (fn.__name__, str(sig)))
+                'request parameter must be the last named parameter in function: %s%s' % (fn.__name__, str(sig)))
     return found
 
 
@@ -99,7 +99,7 @@ class RequestHandler(object):
         self._app = app
         self._func = fn
         self._has_request_arg = has_request_arg(fn)
-        self._has_var_kw_args = has_var_kw_args(fn)
+        self._has_var_kw_args = has_var_kw_arg(fn)
         self._has_named_kw_args = has_named_kw_args(fn)
         self._named_kw_args = get_named_kw_args(fn)
         self._required_kw_args = get_required_kw_args(fn)
