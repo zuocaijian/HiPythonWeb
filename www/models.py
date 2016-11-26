@@ -6,9 +6,10 @@
 
 __author__ = 'zcj'
 
-from orm import Model, StringField, IntegerField, BooleanField, TextField, FloatField
 import time
 import uuid
+
+from www.orm import Model, StringField, BooleanField, TextField, FloatField
 
 
 def next_id():

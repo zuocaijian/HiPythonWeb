@@ -6,8 +6,9 @@
 
 __author__ = 'zcj'
 
-import orm
-from models import User, Blog, Comment
+from models import User
+
+from www import orm
 
 
 def model_test():
