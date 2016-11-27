@@ -26,6 +26,14 @@ async def index(request):
     }
 
 
+@get('/api/users')
+async def api_get_users():
+    users = await User.findAll(orderBy='create_at desc')
+    for u in users:
+        u.passwd = '******'
+    return dict(users=users)
+
+
 if __name__ == '__main__':
     fn = index
     if callable(fn):
