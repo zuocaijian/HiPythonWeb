@@ -1,5 +1,5 @@
 /*! UIkit 2.27.2 | http://www.getuikit.com | (c) 2014 YOOtheme | MIT License */
-(function(addon) {
+(function (addon) {
 
     var component;
 
@@ -8,75 +8,75 @@
     }
 
     if (typeof define == 'function' && define.amd) {
-        define('uikit-grid', ['uikit'], function(){
+        define('uikit-grid', ['uikit'], function () {
             return component || addon(UIkit);
         });
     }
 
-})(function(UI){
+})(function (UI) {
 
     "use strict";
 
     UI.component('grid', {
 
         defaults: {
-            colwidth  : 'auto',
-            animation : true,
-            duration  : 300,
-            gutter    : 0,
-            controls  : false,
-            filter    : false,
-            origin    : UI.langdirection
+            colwidth: 'auto',
+            animation: true,
+            duration: 300,
+            gutter: 0,
+            controls: false,
+            filter: false,
+            origin: UI.langdirection
         },
 
-        boot:  function() {
+        boot: function () {
 
             // init code
-            UI.ready(function(context) {
+            UI.ready(function (context) {
 
-                UI.$('[data-uk-grid]', context).each(function(){
+                UI.$('[data-uk-grid]', context).each(function () {
 
                     var ele = UI.$(this);
 
-                    if(!ele.data('grid')) {
+                    if (!ele.data('grid')) {
                         UI.grid(ele, UI.Utils.options(ele.attr('data-uk-grid')));
                     }
                 });
             });
         },
 
-        init: function() {
+        init: function () {
 
             var $this = this, gutter = String(this.options.gutter).trim().split(' ');
 
-            this.gutterv  = parseInt(gutter[0], 10);
-            this.gutterh  = parseInt((gutter[1] || gutter[0]), 10);
+            this.gutterv = parseInt(gutter[0], 10);
+            this.gutterh = parseInt((gutter[1] || gutter[0]), 10);
 
             // make sure parent element has the right position property
             this.element.css({'position': 'relative'});
 
             this.controls = null;
-            this.origin   = this.options.origin;
+            this.origin = this.options.origin;
 
             if (this.options.controls) {
 
                 this.controls = UI.$(this.options.controls);
 
                 // filter
-                this.controls.on('click', '[data-uk-filter]', function(e){
+                this.controls.on('click', '[data-uk-filter]', function (e) {
                     e.preventDefault();
                     $this.filter(UI.$(this).attr('data-uk-filter'));
                 });
 
                 // sort
-                this.controls.on('click', '[data-uk-sort]', function(e){
+                this.controls.on('click', '[data-uk-sort]', function (e) {
                     e.preventDefault();
                     var cmd = UI.$(this).attr('data-uk-sort').split(':');
                     $this.sort(cmd[0], cmd[1]);
                 });
             }
 
-            UI.$win.on('load resize orientationchange', UI.Utils.debounce(function(){
+            UI.$win.on('load resize orientationchange', UI.Utils.debounce(function () {
 
                 if ($this.currentfilter) {
                     $this.filter($this.currentfilter);
@@ -86,11 +86,11 @@
 
             }.bind(this), 100));
 
-            this.on('display.uk.check', function(){
+            this.on('display.uk.check', function () {
                 if ($this.element.is(':visible'))  $this.update();
             });
 
-            UI.domObserve(this.element, function(e) {
+            UI.domObserve(this.element, function (e) {
                 $this.update();
             });
 
@@ -101,7 +101,7 @@
             }
         },
 
-        _prepareElements: function() {
+        _prepareElements: function () {
 
             var children = this.element.children(':not([data-grid-prepared])'), css;
 
@@ -111,23 +111,23 @@
             }
 
             css = {
-                position  : 'absolute',
-                boxSizing : 'border-box',
-                width     : this.options.colwidth == 'auto' ? '' : this.options.colwidth
+                position: 'absolute',
+                boxSizing: 'border-box',
+                width: this.options.colwidth == 'auto' ? '' : this.options.colwidth
             };
 
             if (this.options.gutter) {
 
-                css['padding-'+this.origin] = this.gutterh;
+                css['padding-' + this.origin] = this.gutterh;
                 css['padding-bottom'] = this.gutterv;
 
-                this.element.css('margin-'+this.origin, this.gutterh * -1);
+                this.element.css('margin-' + this.origin, this.gutterh * -1);
             }
 
             children.attr('data-grid-prepared', 'true').css(css);
         },
 
-        update: function(elements) {
+        update: function (elements) {
 
             var $this = this;
 
@@ -135,42 +135,48 @@
 
             elements = elements || this.element.children(':visible');
 
-            var children  = elements,
-                maxwidth  = this.element.width() + (2*this.gutterh) + 2,
-                left      = 0,
-                top       = 0,
+            var children = elements,
+                maxwidth = this.element.width() + (2 * this.gutterh) + 2,
+                left = 0,
+                top = 0,
                 positions = [],
 
                 item, width, height, pos, posi, i, z, max, size;
 
             this.trigger('beforeupdate.uk.grid', [children]);
 
-            children.each(function(index){
+            children.each(function (index) {
 
-                size   = getElementSize(this);
+                size = getElementSize(this);
 
-                item   = UI.$(this);
-                width  = size.outerWidth;
+                item = UI.$(this);
+                width = size.outerWidth;
                 height = size.outerHeight;
-                left   = 0;
-                top    = 0;
+                left = 0;
+                top = 0;
 
-                for (i=0,max=positions.length;i<max;i++) {
+                for (i = 0, max = positions.length; i < max; i++) {
 
                     pos = positions[i];
 
-                    if (left <= pos.aX) { left = pos.aX; }
-                    if (maxwidth < (left + width)) { left = 0; }
-                    if (top <= pos.aY) { top = pos.aY; }
+                    if (left <= pos.aX) {
+                        left = pos.aX;
+                    }
+                    if (maxwidth < (left + width)) {
+                        left = 0;
+                    }
+                    if (top <= pos.aY) {
+                        top = pos.aY;
+                    }
                 }
 
                 posi = {
-                    ele    : item,
-                    top    : top,
-                    width  : width,
-                    height : height,
-                    aY     : (top  + height),
-                    aX     : (left + width)
+                    ele: item,
+                    top: top,
+                    width: width,
+                    height: height,
+                    aY: (top + height),
+                    aX: (left + width)
                 };
 
                 posi[$this.origin] = left;
@@ -181,23 +187,23 @@
             var posPrev, maxHeight = 0, positionto;
 
             // fix top
-            for (i=0,max=positions.length;i<max;i++) {
+            for (i = 0, max = positions.length; i < max; i++) {
 
                 pos = positions[i];
                 top = 0;
 
-                for (z=0;z<i;z++) {
+                for (z = 0; z < i; z++) {
 
                     posPrev = positions[z];
 
                     // (posPrev.left + 1) fixex 1px bug when using % based widths
-                    if (pos[this.origin] < posPrev.aX && (posPrev[this.origin] +1) < pos.aX) {
+                    if (pos[this.origin] < posPrev.aX && (posPrev[this.origin] + 1) < pos.aX) {
                         top = posPrev.aY;
                     }
                 }
 
                 pos.top = top;
-                pos.aY  = top + pos.height;
+                pos.aY = top + pos.height;
 
                 maxHeight = Math.max(maxHeight, pos.aY);
             }
@@ -208,7 +214,7 @@
 
                 this.element.stop().animate({'height': maxHeight}, 100);
 
-                positions.forEach(function(pos){
+                positions.forEach(function (pos) {
 
                     positionto = {"top": pos.top, opacity: 1};
                     positionto[$this.origin] = pos[$this.origin];
@@ -220,7 +226,7 @@
 
                 this.element.css('height', maxHeight);
 
-                positions.forEach(function(pos){
+                positions.forEach(function (pos) {
                     positionto = {"top": pos.top, opacity: 1};
                     positionto[$this.origin] = pos[$this.origin];
                     pos.ele.css(positionto);
@@ -228,14 +234,14 @@
             }
 
             // make sure to trigger possible scrollpies etc.
-            setTimeout(function() {
+            setTimeout(function () {
                 UI.$doc.trigger('scrolling.uk.document');
-            }, 2 * this.options.duration * (this.options.animation ? 1:0));
+            }, 2 * this.options.duration * (this.options.animation ? 1 : 0));
 
             this.trigger('afterupdate.uk.grid', [children]);
         },
 
-        filter: function(filter) {
+        filter: function (filter) {
 
             this.currentfilter = filter;
 
@@ -246,30 +252,41 @@
             }
 
             if (typeof(filter) === 'string') {
-                filter = filter.split(/,/).map(function(item){ return item.trim(); });
+                filter = filter.split(/,/).map(function (item) {
+                    return item.trim();
+                });
             }
 
-            var $this = this, children = this.element.children(), elements = {"visible": [], "hidden": []}, visible, hidden;
+            var $this = this, children = this.element.children(), elements = {
+                "visible": [],
+                "hidden": []
+            }, visible, hidden;
 
-            children.each(function(index){
+            children.each(function (index) {
 
                 var ele = UI.$(this), f = ele.attr('data-uk-filter'), infilter = filter.length ? false : true;
 
                 if (f) {
 
-                    f = f.split(/,/).map(function(item){ return item.trim(); });
+                    f = f.split(/,/).map(function (item) {
+                        return item.trim();
+                    });
 
-                    filter.forEach(function(item){
+                    filter.forEach(function (item) {
                         if (f.indexOf(item) > -1) infilter = true;
                     });
                 }
 
-                elements[infilter ? "visible":"hidden"].push(ele);
+                elements[infilter ? "visible" : "hidden"].push(ele);
             });
 
             // convert to jQuery collections
-            elements.hidden  = UI.$(elements.hidden).map(function () {return this[0];});
-            elements.visible = UI.$(elements.visible).map(function () {return this[0];});
+            elements.hidden = UI.$(elements.hidden).map(function () {
+                return this[0];
+            });
+            elements.visible = UI.$(elements.visible).map(function () {
+                return this[0];
+            });
 
             elements.hidden.attr('aria-hidden', 'true').filter(':visible').fadeOut(this.options.duration);
             elements.visible.attr('aria-hidden', 'false').filter(':hidden').css('opacity', 0).show();
@@ -277,11 +294,11 @@
             $this.update(elements.visible);
 
             if (this.controls && this.controls.length) {
-                this.controls.find('[data-uk-filter]').removeClass('uk-active').filter('[data-uk-filter="'+filter+'"]').addClass('uk-active');
+                this.controls.find('[data-uk-filter]').removeClass('uk-active').filter('[data-uk-filter="' + filter + '"]').addClass('uk-active');
             }
         },
 
-        sort: function(by, order){
+        sort: function (by, order) {
 
             order = order || 1;
 
@@ -292,42 +309,42 @@
 
             var elements = this.element.children();
 
-            elements.sort(function(a, b){
+            elements.sort(function (a, b) {
 
                 a = UI.$(a);
                 b = UI.$(b);
 
-                return (b.data(by) || '') < (a.data(by) || '') ? order : (order*-1);
+                return (b.data(by) || '') < (a.data(by) || '') ? order : (order * -1);
 
             }).appendTo(this.element);
 
             this.update(elements.filter(':visible'));
 
             if (this.controls && this.controls.length) {
-                this.controls.find('[data-uk-sort]').removeClass('uk-active').filter('[data-uk-sort="'+by+':'+(order == -1 ? 'desc':'asc')+'"]').addClass('uk-active');
+                this.controls.find('[data-uk-sort]').removeClass('uk-active').filter('[data-uk-sort="' + by + ':' + (order == -1 ? 'desc' : 'asc') + '"]').addClass('uk-active');
             }
         }
     });
 
 
     /*!
-    * getSize v1.2.2
-    * measure size of elements
-    * MIT license
-    * https://github.com/desandro/get-size
-    */
+     * getSize v1.2.2
+     * measure size of elements
+     * MIT license
+     * https://github.com/desandro/get-size
+     */
     function _getSize() {
 
         var prefixes = 'Webkit Moz ms Ms O'.split(' ');
         var docElemStyle = document.documentElement.style;
 
-        function getStyleProperty( propName ) {
-            if ( !propName ) {
+        function getStyleProperty(propName) {
+            if (!propName) {
                 return;
             }
 
             // test standard property first
-            if ( typeof docElemStyle[ propName ] === 'string' ) {
+            if (typeof docElemStyle[propName] === 'string') {
                 return propName;
             }
 
@@ -336,9 +353,9 @@
 
             // test vendor specific properties
             var prefixed;
-            for ( var i=0, len = prefixes.length; i < len; i++ ) {
+            for (var i = 0, len = prefixes.length; i < len; i++) {
                 prefixed = prefixes[i] + propName;
-                if ( typeof docElemStyle[ prefixed ] === 'string' ) {
+                if (typeof docElemStyle[prefixed] === 'string') {
                     return prefixed;
                 }
             }
@@ -347,17 +364,18 @@
         // -------------------------- helpers -------------------------- //
 
         // get a number from a string, not a percentage
-        function getStyleSize( value ) {
-            var num = parseFloat( value );
+        function getStyleSize(value) {
+            var num = parseFloat(value);
             // not a percent like '100%', and a number
-            var isValid = value.indexOf('%') === -1 && !isNaN( num );
+            var isValid = value.indexOf('%') === -1 && !isNaN(num);
             return isValid && num;
         }
 
-        function noop() {}
+        function noop() {
+        }
 
-        var logError = typeof console === 'undefined' ? noop : function( message ) {
-            console.error( message );
+        var logError = typeof console === 'undefined' ? noop : function (message) {
+            console.error(message);
         };
 
         // -------------------------- measurements -------------------------- //
@@ -386,9 +404,9 @@
                 outerWidth: 0,
                 outerHeight: 0
             };
-            for ( var i=0, len = measurements.length; i < len; i++ ) {
+            for (var i = 0, len = measurements.length; i < len; i++) {
                 var measurement = measurements[i];
-                size[ measurement ] = 0;
+                size[measurement] = 0;
             }
             return size;
         }
@@ -400,33 +418,33 @@
         var getStyle, boxSizingProp, isBoxSizeOuter;
 
         /**
-        * setup vars and functions
-        * do it on initial getSize(), rather than on script load
-        * For Firefox bug https://bugzilla.mozilla.org/show_bug.cgi?id=548397
-        */
+         * setup vars and functions
+         * do it on initial getSize(), rather than on script load
+         * For Firefox bug https://bugzilla.mozilla.org/show_bug.cgi?id=548397
+         */
         function setup() {
             // setup once
-            if ( isSetup ) {
+            if (isSetup) {
                 return;
             }
             isSetup = true;
 
             var getComputedStyle = window.getComputedStyle;
-            getStyle = ( function() {
+            getStyle = (function () {
                 var getStyleFn = getComputedStyle ?
-                function( elem ) {
-                    return getComputedStyle( elem, null );
-                } :
-                function( elem ) {
-                    return elem.currentStyle;
-                };
+                    function (elem) {
+                        return getComputedStyle(elem, null);
+                    } :
+                    function (elem) {
+                        return elem.currentStyle;
+                    };
 
-                return function getStyle( elem ) {
-                    var style = getStyleFn( elem );
-                    if ( !style ) {
-                        logError( 'Style returned ' + style +
-                        '. Are you running this code in a hidden iframe on Firefox? ' +
-                        'See http://bit.ly/getsizebug1' );
+                return function getStyle(elem) {
+                    var style = getStyleFn(elem);
+                    if (!style) {
+                        logError('Style returned ' + style +
+                            '. Are you running this code in a hidden iframe on Firefox? ' +
+                            'See http://bit.ly/getsizebug1');
                     }
                     return style;
                 };
@@ -437,46 +455,46 @@
             boxSizingProp = getStyleProperty('boxSizing');
 
             /**
-            * WebKit measures the outer-width on style.width on border-box elems
-            * IE & Firefox measures the inner-width
-            */
-            if ( boxSizingProp ) {
+             * WebKit measures the outer-width on style.width on border-box elems
+             * IE & Firefox measures the inner-width
+             */
+            if (boxSizingProp) {
                 var div = document.createElement('div');
                 div.style.width = '200px';
                 div.style.padding = '1px 2px 3px 4px';
                 div.style.borderStyle = 'solid';
                 div.style.borderWidth = '1px 2px 3px 4px';
-                div.style[ boxSizingProp ] = 'border-box';
+                div.style[boxSizingProp] = 'border-box';
 
                 var body = document.body || document.documentElement;
-                body.appendChild( div );
-                var style = getStyle( div );
+                body.appendChild(div);
+                var style = getStyle(div);
 
-                isBoxSizeOuter = getStyleSize( style.width ) === 200;
-                body.removeChild( div );
+                isBoxSizeOuter = getStyleSize(style.width) === 200;
+                body.removeChild(div);
             }
 
         }
 
         // -------------------------- getSize -------------------------- //
 
-        function getSize( elem ) {
+        function getSize(elem) {
             setup();
 
             // use querySeletor if elem is string
-            if ( typeof elem === 'string' ) {
-                elem = document.querySelector( elem );
+            if (typeof elem === 'string') {
+                elem = document.querySelector(elem);
             }
 
             // do not proceed on non-objects
-            if ( !elem || typeof elem !== 'object' || !elem.nodeType ) {
+            if (!elem || typeof elem !== 'object' || !elem.nodeType) {
                 return;
             }
 
-            var style = getStyle( elem );
+            var style = getStyle(elem);
 
             // if hidden, everything is 0
-            if ( style.display === 'none' ) {
+            if (style.display === 'none') {
                 return getZeroSize();
             }
 
@@ -485,16 +503,16 @@
             size.height = elem.offsetHeight;
 
             var isBorderBox = size.isBorderBox = !!( boxSizingProp &&
-                style[ boxSizingProp ] && style[ boxSizingProp ] === 'border-box' );
+            style[boxSizingProp] && style[boxSizingProp] === 'border-box' );
 
             // get all measurements
-            for ( var i=0, len = measurements.length; i < len; i++ ) {
+            for (var i = 0, len = measurements.length; i < len; i++) {
                 var measurement = measurements[i];
-                var value = style[ measurement ];
+                var value = style[measurement];
 
-                var num = parseFloat( value );
+                var num = parseFloat(value);
                 // any 'auto', 'medium' value will be 0
-                size[ measurement ] = !isNaN( num ) ? num : 0;
+                size[measurement] = !isNaN(num) ? num : 0;
             }
 
             var paddingWidth = size.paddingLeft + size.paddingRight;
@@ -507,18 +525,18 @@
             var isBorderBoxSizeOuter = isBorderBox && isBoxSizeOuter;
 
             // overwrite width and height if we can get it from style
-            var styleWidth = getStyleSize( style.width );
-            if ( styleWidth !== false ) {
+            var styleWidth = getStyleSize(style.width);
+            if (styleWidth !== false) {
                 size.width = styleWidth +
-                // add padding and border unless it's already including it
-                ( isBorderBoxSizeOuter ? 0 : paddingWidth + borderWidth );
+                    // add padding and border unless it's already including it
+                    ( isBorderBoxSizeOuter ? 0 : paddingWidth + borderWidth );
             }
 
-            var styleHeight = getStyleSize( style.height );
-            if ( styleHeight !== false ) {
+            var styleHeight = getStyleSize(style.height);
+            if (styleHeight !== false) {
                 size.height = styleHeight +
-                // add padding and border unless it's already including it
-                ( isBorderBoxSizeOuter ? 0 : paddingHeight + borderHeight );
+                    // add padding and border unless it's already including it
+                    ( isBorderBoxSizeOuter ? 0 : paddingHeight + borderHeight );
             }
 
             size.innerWidth = size.width - ( paddingWidth + borderWidth );
