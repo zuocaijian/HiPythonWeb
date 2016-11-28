@@ -56,10 +56,10 @@ async def logger_factory(app, handler):
 async def data_factory(app, handler):
     async def parse_data(request):
         if request.method == 'POST':
-            if request.content_type.startwith('application/json'):
+            if request.content_type.startswith('application/json'):
                 request.__data__ = await request.json()
                 logging.info('request json: %s' % str(request.__data__))
-            elif request.content_type.startwith('application/x-www-form-urlencode'):
+            elif request.content_type.startswith('application/x-www-form-urlencode'):
                 request.__data__ = await request.post()
                 logging.info('request form: %s' % str(request.__data__))
         return await handler(request)
@@ -78,7 +78,7 @@ async def response_factory(app, handler):
             resp.content_type = 'application/octet-stream'
             return resp
         if isinstance(r, str):
-            if r.startwith('redirect:'):
+            if r.startswith('redirect:'):
                 return web.HTTPFound(r[9:])
             resp = web.Response(body=r.encode('utf-8'))
             resp.content_type = 'text/html;charset=utf-8'
