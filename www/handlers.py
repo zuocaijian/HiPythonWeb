@@ -156,10 +156,4 @@ async def api_register_user(*, email, name, passwd):
 
 
 if __name__ == '__main__':
-    fn = index
-    if callable(fn):
-        print('abc')
-        method = getattr(fn, '__method__', None)
-        path = getattr(fn, '__route__', None)
-        if method and path:
-            print('true')
+    pass

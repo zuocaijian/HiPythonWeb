@@ -6,9 +6,11 @@
 
 __author__ = 'zcj'
 
-from models import User
+from www.models import User
 
 from www import orm
+
+from hashlib import sha1
 
 
 def model_test():
@@ -20,5 +22,8 @@ def model_test():
 
 
 if __name__ == '__main__':
-    for x in model_test():
-        pass
+    # for x in model_test():
+    #     pass
+    utf8Str = ('253672586@qq.com' + ':' + 'zcj19901202').encode('utf-8')
+    sha1Str = sha1(utf8Str).hexdigest()
+    print(sha1Str)
