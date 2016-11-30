@@ -12,6 +12,7 @@ from www.apis import APIError, APIValueError, APIPermissionError, APIResourceNot
 from www.coroweb import get, post
 from www.models import User, Blog, Comment, next_id
 from www.config import configs
+from www.markdown2 import markdown
 
 from aiohttp import web
 
@@ -19,6 +20,28 @@ _RE_EMAIL = re.compile(r'^[a-z0-9\.\-\_]+\@[a-z0-9\-\_]+(\.[a-z0-9\-\_]+){1,4}$'
 _RE_SHA1 = re.compile(r'^[0-9a-f]{40}$')
 COOKIE_NAME = 'awesession'
 _COOKIE_KEY = configs.session.secret
+
+
+def check_admin(request):
+    if request.__user__ is None or not request.__user__.admin:
+        raise APIPermissionError()
+
+
+def get_page_index(page_str):
+    p = 1
+    try:
+        p = int(page_str)
+    except ValueError as e:
+        pass
+    if p < 1:
+        p = 1
+    return p
+
+
+def text2html(text):
+    lines = map(lambda s: '<p>%s</p>' % s.replace('&' '&amp;').replace('<', '&lt;').replace('>', '&gt;'),
+                filter(lambda s: s.strip() != '', text.split('\n')))
+    return lines
 
 
 def user2cookie(user, max_age):
@@ -70,6 +93,35 @@ async def index(request):
         '__template__': 'blogs.html',
         'blogs': blogs
     }
+
+
+@get('/blog/{id}')
+async def get_blog(id):
+    blog = await Blog.find(id)
+    comments = await Comment.findAll('blog_id=?', [id], orderBy='created_at desc')
+    for c in comments:
+        c.html_content = text2html(c.content)
+    blog.html_content = markdown(blog.content)
+    return {
+        '__template__': 'blog.html',
+        'blog': blog,
+        'comments': comments
+    }
+
+
+@get('/manage/blogs/create')
+def manage_create_blog():
+    return {
+        '__template__': 'manage_blog_edit.html',
+        'id': '',
+        'action': '/api/blogs'
+    }
+
+
+@get('/api/blogs/{id}')
+def api_get_blog(*, id):
+    blog = yield from Blog.find(id)
+    return blog
 
 
 @get('/register')
