@@ -277,9 +277,41 @@ async def api_register_user(*, email, name, passwd):
     return r
 
 
+@get('/manage/users')
+def manage_users(*, page='1'):
+    '''
+    管理页面：用户列表页
+    '''
+    return {
+        '__template__': 'manage_users.html',
+        'page_index': get_page_index(page)
+    }
+
+
+@get('/manage/comments')
+def manage_comments(*, page='1'):
+    '''
+    管理页面：评论列表页
+    '''
+    return {
+        '__template__': 'manage_comments.html',
+        'page_index': get_page_index(page)
+    }
+
+
+@get('/api/comments')
+async def api_comments(*, page='1'):
+    page_index = get_page_index(page)
+    num = await Comment.findNumber('count(id)')
+    p = Page(num, page_index)
+    if num == 0:
+        return dict
+
+
 # todo：管理页面：评论列表页（GET /manage/commnets)、修改日志页（GET /manage/blogs/edit）、用户列表页（GET /manage/users）
 # todo：后端API：修改日志（POST /api/blogs/edit/:blog_id）、删除日志（POST /api/blogs/:blog_id/delete）、获取评论（GET /api/comments）
 # todo：后端API：创建评论（POST /api/blogs/:blog_id/comments）、删除评论（POST /api/comments/:comment_id/delete）
+
 
 if __name__ == '__main__':
     pass
