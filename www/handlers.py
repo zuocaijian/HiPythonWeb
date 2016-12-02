@@ -8,7 +8,7 @@ __author__ = 'zcj'
 
 import re, time, json, logging, hashlib, base64, asyncio
 
-from www.apis import APIError, APIValueError, APIPermissionError, APIResourceNotFoundError
+from www.apis import Page, APIError, APIValueError, APIPermissionError, APIResourceNotFoundError
 from www.coroweb import get, post
 from www.models import User, Blog, Comment, next_id
 from www.config import configs
@@ -83,6 +83,9 @@ async def cookie2user(cookie_str):
 
 @get('/')
 async def index(request):
+    '''
+    用户浏览页：首页
+    '''
     summary = 'Lorem ipsum dolor sit amet, consectetur adpipislicin elit sed wo tempo inciditundng up labore et doloire mabndf aliquea'
     blogs = [
         Blog(id='1', name='Test Blog', summary=summary, create_at=time.time() - 120),
@@ -97,6 +100,9 @@ async def index(request):
 
 @get('/blog/{id}')
 async def get_blog(id):
+    '''
+    用户浏览页：日志详情页
+    '''
     blog = await Blog.find(id)
     comments = await Comment.findAll('blog_id=?', [id], orderBy='create_at desc')
     for c in comments:
@@ -109,8 +115,22 @@ async def get_blog(id):
     }
 
 
+@get('/manage/blogs')
+def manage_blogs(*, page='1'):
+    '''
+    管理页面：日志列表页
+    '''
+    return {
+        '__template__': 'manage_blogs.html',
+        'page_index': get_page_index(page)
+    }
+
+
 @get('/manage/blogs/create')
 def manage_create_blog():
+    '''
+    管理页面：创建日志页
+    '''
     return {
         '__template__': 'manage_blog_edit.html',
         'id': '',
@@ -118,14 +138,34 @@ def manage_create_blog():
     }
 
 
+@get('/api/blogs')
+async def api_blogs(*, page='1'):
+    '''
+    后端API：获取日志
+    '''
+    page_index = get_page_index(page)
+    num = await Blog.findNumber('count(id)')
+    p = Page(num, page_index)
+    if num == 0:
+        return dict(page=p, blog=())
+    blogs = await Blog.findAll(orderBy='create_at desc', limit=(p.offset, p.limit))
+    return dict(page=p, blogs=blogs)
+
+
 @get('/api/blogs/{id}')
 async def api_get_blog(*, id):
+    '''
+    后端API：获取具体一篇日志
+    '''
     blog = await Blog.find(id)
     return blog
 
 
 @post('/api/blogs')
 async def api_create_blog(request, *, name, summary, content):
+    '''
+    后端API：创建日志
+    '''
     check_admin(request)
     if not name or not name.strip():
         raise APIValueError('name', 'name cannot be empty.')
@@ -141,6 +181,9 @@ async def api_create_blog(request, *, name, summary, content):
 
 @get('/register')
 def register():
+    '''
+    用户浏览页：注册页
+    '''
     return {
         '__template__': 'register.html'
     }
@@ -148,6 +191,9 @@ def register():
 
 @get('/signin')
 def signin():
+    '''
+    用户浏览页：登录页
+    '''
     return {
         '__template__': 'signin.html'
     }
@@ -181,6 +227,9 @@ async def authenticate(*, email, passwd):
 
 @get('/signout')
 def signout(request):
+    '''
+    用户浏览页:注销页
+    '''
     referer = request.headers.get('Referer')
     r = web.HTTPFound(referer or '/')
     r.set_cookie(COOKIE_NAME, '-deleted-', max_age=0, httponly=True)
@@ -190,6 +239,9 @@ def signout(request):
 
 @get('/api/users')
 async def api_get_users():
+    '''
+    后端API：获取用户
+    '''
     users = await User.findAll(orderBy='create_at desc')
     for u in users:
         u.passwd = '******'
@@ -198,6 +250,9 @@ async def api_get_users():
 
 @post('/api/users')
 async def api_register_user(*, email, name, passwd):
+    '''
+    后端API：创建新用户
+    '''
     if not name or not name.strip():
         raise APIValueError('name')
     if not email or not _RE_EMAIL.match(email):
@@ -221,6 +276,10 @@ async def api_register_user(*, email, name, passwd):
     r.body = json.dumps(user, ensure_ascii=False).encode('utf-8')
     return r
 
+
+# todo：管理页面：评论列表页（GET /manage/commnets)、修改日志页（GET /manage/blogs/edit）、用户列表页（GET /manage/users）
+# todo：后端API：修改日志（POST /api/blogs/edit/:blog_id）、删除日志（POST /api/blogs/:blog_id/delete）、获取评论（GET /api/comments）
+# todo：后端API：创建评论（POST /api/blogs/:blog_id/comments）、删除评论（POST /api/comments/:comment_id/delete）
 
 if __name__ == '__main__':
     pass
