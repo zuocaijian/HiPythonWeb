@@ -30,7 +30,7 @@
 
         $(function () {
             if (ID) {
-                getJSON('/api/blogs' + ID, function (err, blog) {
+                getJSON('/api/blogs/' + ID, function (err, blog) {
                     if (err) {
                         return fatal(err);
                     } else {
