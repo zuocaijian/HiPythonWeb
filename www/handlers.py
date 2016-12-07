@@ -301,11 +301,88 @@ def manage_comments(*, page='1'):
 
 @get('/api/comments')
 async def api_comments(*, page='1'):
+    '''
+    后端API：获取评论
+    '''
     page_index = get_page_index(page)
     num = await Comment.findNumber('count(id)')
     p = Page(num, page_index)
     if num == 0:
         return dict
+
+
+@get('/manage/blogs/edit')
+async def manage_edit_blog(*, id):
+    '''
+    管理页面：修改日志页
+    '''
+    return {
+        '__template__': 'manage_blog_edit.html',
+        'id': id,
+        'action': '/api/blogs/%s' % id
+    }
+
+
+@post('/api/blogs/{id}')
+async def api_update_blog(id, request, *, name, summary, content):
+    '''
+    后端API：修改日志
+    '''
+    check_admin(request)
+    blog = await Blog.find(id)
+    if not name or not name.strip():
+        raise APIValueError('name', 'name cannot be empty.')
+    if not summary or not summary.strip():
+        raise APIValueError('summary', 'summary cannot be empty.')
+    if not content or content.strip():
+        raise APIValueError('content', 'content cannot be empty.')
+    blog.name = name.strip()
+    blog.summary = summary.strip()
+    blog.content = summary.strip()
+    await blog.update()
+    return blog
+
+
+@post('/api/blogs/{id}/delete')
+async def api_delete_blog(request, *, id):
+    '''
+    后端API：删除日志
+    '''
+    check_admin(request)
+    blog = await Blog.find(id)
+    await blog.remove()
+    return dict(id=id)
+
+
+@post('/api/blogs/{id}/comments')
+async def api_create_comment(id, request, *, content):
+    '''
+    后端API：创建评论
+    '''
+    user = request.__user__
+    if user is None:
+        raise APIPermissionError('Please signin first.')
+    if not content or not content.strip():
+        raise APIValueError('content')
+    blog = Blog.find(id)
+    if blog is None:
+        raise APIResourceNotFoundError('Blog')
+    comment = Comment(blog_id=id, user_id=user.id, user_name=user.name, user_iamge=user.image, content=content.strip())
+    await comment.save()
+    return comment
+
+
+@post('/api/comments/{id}/delete')
+async def api_delete_comment(id, request):
+    '''
+    后端API：删除评论
+    '''
+    check_admin(request)
+    comment = await Comment.find(id)
+    if comment is None:
+        raise APIResourceNotFoundError('Comment')
+    await comment.remove()
+    return dict(id=id)
 
 
 # todo：管理页面：评论列表页（GET /manage/commnets)、修改日志页（GET /manage/blogs/edit）、用户列表页（GET /manage/users）
