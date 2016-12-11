@@ -308,7 +308,9 @@ async def api_comments(*, page='1'):
     num = await Comment.findNumber('count(id)')
     p = Page(num, page_index)
     if num == 0:
-        return dict
+        return dict(page=p, comments=())
+    comments = await Comment.findAll(orderBy='create_at desc', limit=(p.offset, p.limit))
+    return dict(page=p, comments=comments)
 
 
 @get('/manage/blogs/edit')
@@ -367,7 +369,7 @@ async def api_create_comment(id, request, *, content):
     blog = Blog.find(id)
     if blog is None:
         raise APIResourceNotFoundError('Blog')
-    comment = Comment(blog_id=id, user_id=user.id, user_name=user.name, user_iamge=user.image, content=content.strip())
+    comment = Comment(blog_id=id, user_id=user.id, user_name=user.name, user_image=user.image, content=content.strip())
     await comment.save()
     return comment
 
